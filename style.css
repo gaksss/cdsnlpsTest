@@ -1,19 +1,135 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
     max-width: 800px;
     margin: auto;
     padding: 1rem;
+    background: #f7f8fa;
+    color: #222;
 }
-form {
+
+h1 {
+    text-align: center;
+    font-size: 2.2rem;
     margin-bottom: 2rem;
+    color: #2d3a4a;
 }
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
 input[type="text"] {
-    width: 60%;
-    padding: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #bfc9d1;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    background: #fff;
+    transition: border 0.2s;
 }
-button {
-    padding: 0.5rem 1rem;
+input[type="text"]:focus {
+    border: 2px solid #4f8cff;
+    outline: none;
 }
-li {
-    margin-bottom: 0.5rem;
+
+input[type="submit"] {
+    padding: 0.7rem 2rem;
+    background: linear-gradient(90deg, #4f8cff 0%, #6ed0f6 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+input[type="submit"]:hover, input[type="submit"]:focus {
+    background: linear-gradient(90deg, #357ae8 0%, #4f8cff 100%);
+    box-shadow: 0 4px 16px rgba(79,140,255,0.13);
+}
+
+#suggestions {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border: 1px solid #e0e4ea;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 16px rgba(44,62,80,0.08);
+    z-index: 10;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    overflow: hidden;
+}
+#suggestions li {
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f2f5;
+    transition: background 0.15s;
+}
+#suggestions li:last-child {
+    border-bottom: none;
+}
+#suggestions li:hover, #suggestions li:focus {
+    background: #eaf3ff;
+    color: #357ae8;
+}
+
+ul.results {
+    margin: 2rem auto 0 auto;
+    padding: 0;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(44,62,80,0.07);
+    list-style: none;
+}
+ul.results li {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+ul.results li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 0.5rem;
+    }
+    h1 {
+        font-size: 1.3rem;
+    }
+    input[type="text"], #suggestions, ul.results {
+        max-width: 98vw;
+        font-size: 1rem;
+    }
+    ul.results li {
+        padding: 0.7rem 0.7rem;
+    }
+}
+
+/* Accessibilité */
+input[type="text"], input[type="submit"] {
+    outline-offset: 2px;
+}
+#suggestions li {
+    outline: none;
+}
+#suggestions li:active {
+    background: #dbeafe;
 }
