@@ -6,12 +6,12 @@ require_once('config.php');
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
 // Prépare la requête SQL avec un paramètre
-$stmt = $pdo->prepare("SELECT * FROM catalogue WHERE artist LIKE :search");
+$stmt = $pdo->prepare("SELECT * FROM catalogue WHERE artist LIKE :search OR title LIKE :search OR label LIKE :search OR pressing LIKE :search");
 $stmt->execute(['search' => "%$search%"]);
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// var_dump($results);
+
 
 ?>
 
@@ -35,48 +35,51 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
 
     <script>
-    const searchInput = document.getElementById('search');
-    const suggestions = document.getElementById('suggestions');
+        const searchInput = document.getElementById('search');
+        const suggestions = document.getElementById('suggestions');
 
-    searchInput.addEventListener('input', function() {
-        const query = this.value;
-        if (query.length < 2) {
-            suggestions.innerHTML = '';
-            return;
-        }
-        fetch('autocomplete.php?search=' + encodeURIComponent(query))
-            .then(response => response.json())
-            .then(data => {
+        searchInput.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 2) {
                 suggestions.innerHTML = '';
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = item.artist + ' || ' + item.title;
-                    li.style.cursor = 'pointer';
-                    li.onclick = function() {
-                        searchInput.value = item.artist;
-                        suggestions.innerHTML = '';
-                    };
-                    suggestions.appendChild(li);
+                return;
+            }
+            fetch('autocomplete.php?search=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+                    data.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = item.artist + ' || ' + item.title;
+                        li.style.cursor = 'pointer';
+                        li.onclick = function() {
+                            searchInput.value = item.artist;
+                            suggestions.innerHTML = '';
+                        };
+                        suggestions.appendChild(li);
+                    });
                 });
-            });
-    });
-    // Cacher les suggestions si on clique ailleurs
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target)) {
-            suggestions.innerHTML = '';
-        }
-    });
+        });
+        // Cacher les suggestions si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target)) {
+                suggestions.innerHTML = '';
+            }
+        });
     </script>
 
     <?php if (!empty($results)) { ?>
-        <ul class="results" aria-live="polite">
-        <?php foreach ($results as $result) { ?>
-            <li tabindex="0">
-                <span><strong><?= htmlspecialchars($result['artist']) ?></strong></span>
-                <span><?= htmlspecialchars($result['title']) ?></span>
-            </li>
-        <?php } ?>
+       <ul class="results" aria-live="polite"> 
+            <?php foreach ($results as $result) { ?>
+                <li tabindex="0">
+                    <span><strong><?= htmlspecialchars($result['artist']) ?></strong></span>
+                    <span><?= htmlspecialchars($result['title']) ?></span>
+                    <span><?= htmlspecialchars($result['label']) ?></span>
+                    <span><?= htmlspecialchars($result['pressing']) ?></span>
+                </li>
+            <?php } ?>
         </ul>
+
     <?php } else if ($search !== '') { ?>
         <p style="text-align:center;color:#888;">Aucun résultat trouvé.</p>
     <?php } ?>
