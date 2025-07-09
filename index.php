@@ -13,15 +13,21 @@ require_once('config.php');
 
 // On détermine le nombre de disque total
 
-$sql = 'SELECT COUNT(*) AS nb_disques FROM `catalogue`;';
+// Récupère la valeur de recherche depuis le formulaire GET
+$search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$query = $pdo->prepare($sql);
+// Requête pour compter le nombre de disques selon la recherche
+if (!empty($search)) {
+    $countStmt = $pdo->prepare("SELECT COUNT(*) AS nb_disques FROM catalogue WHERE artist LIKE :search OR title LIKE :search OR label LIKE :search OR pressing LIKE :search;");
+    $countStmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+} else {
+    $countStmt = $pdo->prepare("SELECT COUNT(*) AS nb_disques FROM catalogue;");
+}
 
-$query->execute();
-
-$result = $query->fetch();
-
+$countStmt->execute();
+$result = $countStmt->fetch();
 $nb_disques = (int) $result['nb_disques'];
+
 
 // On détermine le nombre de disque par page
 
@@ -55,18 +61,20 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vinyl Collection - Disques Vinyles d'Occasion</title>
     <link rel="stylesheet" href="style.css">
-    
+
 </head>
+
 <body>
     <header class="header">
         <div class="container">
             <h1>Vinyl Collection</h1>
-            <p class="subtitle">Découvrez des milliers de disques vinyles d'occasion</p>
+
         </div>
     </header>
 
@@ -74,16 +82,15 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <section class="search-section">
             <form class="search-form" action="index.php" method="GET" autocomplete="off">
                 <div class="search-input-wrapper">
-                    <input 
-                        id="search" 
-                        name="search" 
-                        type="text" 
+                    <input
+                        id="search"
+                        name="search"
+                        type="text"
                         class="search-input"
-                        placeholder="Rechercher par artiste, titre, label..." 
-                        value="<?= htmlspecialchars($search ?? '') ?>" 
+                        placeholder="Rechercher par artiste, titre, label..."
+                        value="<?= htmlspecialchars($search ?? '') ?>"
                         autocomplete="off"
-                        aria-label="Rechercher des disques"
-                    >
+                        aria-label="Rechercher des disques">
                     <ul id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions de recherche"></ul>
                 </div>
                 <button type="submit" class="search-button">
@@ -108,12 +115,11 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach ($results as $result) { ?>
                         <article class="record-card" tabindex="0" role="article">
                             <div class="record-header">
-                                <img 
-                                    src="<?= htmlspecialchars($result['picture1']) ?>" 
+                                <img
+                                    src="<?= htmlspecialchars($result['picture1']) ?>"
                                     alt="Pochette de <?= htmlspecialchars($result['title']) ?> par <?= htmlspecialchars($result['artist']) ?>"
                                     class="record-cover"
-                                    loading="lazy"
-                                />
+                                    loading="lazy" />
                                 <div class="record-info">
                                     <h3 class="record-artist"><?= htmlspecialchars($result['artist']) ?></h3>
                                     <div class="record-title"><?= htmlspecialchars($result['title']) ?></div>
@@ -134,35 +140,35 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <nav class="pagination-wrapper" role="navigation" aria-label="Navigation pagination">
                     <ul class="pagination">
                         <li>
-                            <a href="index.php?page=<?= max(1, $currentPage - 1) ?>&search=<?= urlencode($search) ?>" 
-                               class="<?= ($currentPage === 1) ? "disabled" : "" ?>"
-                               aria-label="Page précédente">
+                            <a href="index.php?page=<?= max(1, $currentPage - 1) ?>&search=<?= urlencode($search) ?>"
+                                class="<?= ($currentPage === 1) ? "disabled" : "" ?>"
+                                aria-label="Page précédente">
                                 ← Précédent
                             </a>
                         </li>
-                        
-                        <?php 
+
+                        <?php
                         $start = max(1, $currentPage - 2);
                         $end = min($pages, $currentPage + 2);
-                        
+
                         if ($start > 1) {
                             echo '<li><a href="index.php?page=1&search=' . urlencode($search) . '">1</a></li>';
                             if ($start > 2) {
                                 echo '<li><span>...</span></li>';
                             }
                         }
-                        
+
                         for ($page = $start; $page <= $end; $page++): ?>
                             <li>
-                                <a href="index.php?page=<?= $page ?>&search=<?= urlencode($search) ?>" 
-                                   class="<?= ($currentPage === $page) ? "active" : "" ?>"
-                                   aria-label="Page <?= $page ?>"
-                                   <?= ($currentPage === $page) ? 'aria-current="page"' : '' ?>>
+                                <a href="index.php?page=<?= $page ?>&search=<?= urlencode($search) ?>"
+                                    class="<?= ($currentPage === $page) ? "active" : "" ?>"
+                                    aria-label="Page <?= $page ?>"
+                                    <?= ($currentPage === $page) ? 'aria-current="page"' : '' ?>>
                                     <?= $page ?>
                                 </a>
                             </li>
-                        <?php endfor; 
-                        
+                        <?php endfor;
+
                         if ($end < $pages) {
                             if ($end < $pages - 1) {
                                 echo '<li><span>...</span></li>';
@@ -170,11 +176,12 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             echo '<li><a href="index.php?page=' . $pages . '&search=' . urlencode($search) . '">' . $pages . '</a></li>';
                         }
                         ?>
-                        
+
                         <li>
-                            <a href="index.php?page=<?= min($pages, $currentPage + 1) ?>&search=<?= urlencode($search) ?>" 
-                               class="<?= ($currentPage === $pages) ? "disabled" : "" ?>"
-                               aria-label="Page suivante">
+
+                            <a href="index.php?page=<?= min($pages, $currentPage + 1) ?>&search=<?= urlencode($search) ?>"
+                                class="<?= ($currentPage == $pages) ? "disabled" : "" ?>"
+                                aria-label="Page suivante">
                                 Suivant →
                             </a>
                         </li>
@@ -190,8 +197,9 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php } ?>
     </main>
 
-    
+
 </body>
+
 </html>
 
 <script defer src="script.js"></script>
