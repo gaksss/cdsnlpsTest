@@ -65,7 +65,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vinyl Collection - Disques Vinyles d'Occasion</title>
+    <title>CD and LP</title>
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -73,7 +73,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <header class="header">
         <div class="container">
-            <h1>Vinyl Collection</h1>
+            <h1>CD and LP</h1>
 
         </div>
     </header>
@@ -101,7 +101,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <?php if (!empty($results)) { ?>
             <section class="results-section">
-                <div class="results-header">
+                <header class="results-header">
                     <div class="results-count">
                         <?= $nb_disques ?> disque<?= $nb_disques > 1 ? 's' : '' ?> trouvé<?= $nb_disques > 1 ? 's' : '' ?>
                     </div>
@@ -109,84 +109,17 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <button class="view-btn active" data-view="grid">Grille</button>
                         <button class="view-btn" data-view="list">Liste</button>
                     </div>
-                </div>
+                </header>
 
                 <div class="results-grid" id="results-container" role="main" aria-live="polite">
                     <?php foreach ($results as $result) { ?>
-                        <article class="record-card" tabindex="0" role="article">
-                            <div class="record-header">
-                                <img
-                                    src="<?= htmlspecialchars($result['picture1']) ?>"
-                                    alt="Pochette de <?= htmlspecialchars($result['title']) ?> par <?= htmlspecialchars($result['artist']) ?>"
-                                    class="record-cover"
-                                    loading="lazy" />
-                                <div class="record-info">
-                                    <h3 class="record-artist"><?= htmlspecialchars($result['artist']) ?></h3>
-                                    <div class="record-title"><?= htmlspecialchars($result['title']) ?></div>
-                                </div>
-                            </div>
-                            <div class="record-details">
-                                <div class="record-label">
-                                    <strong>Label:</strong> <?= htmlspecialchars($result['label']) ?>
-                                </div>
-                                <div class="record-pressing">
-                                    <strong>Pressage:</strong> <?= htmlspecialchars($result['pressing']) ?>
-                                </div>
-                            </div>
-                        </article>
+                        <?php
+                        include("./partials/card.php")
+                        ?>
                     <?php } ?>
                 </div>
 
-                <nav class="pagination-wrapper" role="navigation" aria-label="Navigation pagination">
-                    <ul class="pagination">
-                        <li>
-                            <a href="index.php?page=<?= max(1, $currentPage - 1) ?>&search=<?= urlencode($search) ?>"
-                                class="<?= ($currentPage === 1) ? "disabled" : "" ?>"
-                                aria-label="Page précédente">
-                                ← Précédent
-                            </a>
-                        </li>
-
-                        <?php
-                        $start = max(1, $currentPage - 2);
-                        $end = min($pages, $currentPage + 2);
-
-                        if ($start > 1) {
-                            echo '<li><a href="index.php?page=1&search=' . urlencode($search) . '">1</a></li>';
-                            if ($start > 2) {
-                                echo '<li><span>...</span></li>';
-                            }
-                        }
-
-                        for ($page = $start; $page <= $end; $page++): ?>
-                            <li>
-                                <a href="index.php?page=<?= $page ?>&search=<?= urlencode($search) ?>"
-                                    class="<?= ($currentPage === $page) ? "active" : "" ?>"
-                                    aria-label="Page <?= $page ?>"
-                                    <?= ($currentPage === $page) ? 'aria-current="page"' : '' ?>>
-                                    <?= $page ?>
-                                </a>
-                            </li>
-                        <?php endfor;
-
-                        if ($end < $pages) {
-                            if ($end < $pages - 1) {
-                                echo '<li><span>...</span></li>';
-                            }
-                            echo '<li><a href="index.php?page=' . $pages . '&search=' . urlencode($search) . '">' . $pages . '</a></li>';
-                        }
-                        ?>
-
-                        <li>
-
-                            <a href="index.php?page=<?= min($pages, $currentPage + 1) ?>&search=<?= urlencode($search) ?>"
-                                class="<?= ($currentPage == $pages) ? "disabled" : "" ?>"
-                                aria-label="Page suivante">
-                                Suivant →
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+                <?php include_once("./partials/pagination.php") ?>
             </section>
         <?php } else if ($search !== '') { ?>
             <section class="no-results">
